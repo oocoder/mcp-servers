@@ -3,7 +3,7 @@
     "minimal-claude": {
       "command": "python3",
       "args": [
-        "/Users/alexmaldonado/projects/mcp-servers/claude/minimal_claude_server.py"
+        "./src/mcp_compliant_server.py"
       ],
       "env": {
         "WORKING_DIR_ONLY": "true",
