@@ -1,6 +1,6 @@
-# Claude MCP Server v1.2
+# Claude MCP Server v1.3
 
-Production-ready Model Context Protocol (MCP) server with comprehensive development tools, fast unit test suite, and optimized Task tool implementation.
+Production-ready Model Context Protocol (MCP) server with comprehensive development tools, fast unit test suite, and optimized Task tool implementation with Pydantic validation fixes.
 
 ## Quick Start
 
@@ -13,6 +13,7 @@ claude mcp serve
 - **Complete Development Environment**: 14 integrated tools for full development lifecycle
 - **Production-Ready Task Tool**: Enhanced with MCP delegation and fallback mechanisms  
 - **Native MCP Compliance**: Progress notifications, permissions, capability negotiation
+- **Pydantic Validation Fix**: Resolves CallToolResult content structure validation errors
 - **Fast Unit Testing**: 26 unit tests execute in <1s with comprehensive negative test coverage
 - **Robust Error Handling**: Comprehensive validation and graceful degradation
 
@@ -200,7 +201,9 @@ export SKIP_SLOW_TESTS=true  # For CI/CD
 - **MCP Delegation**: Delegates to official Claude MCP server when available
 - **Fallback Mode**: Graceful simulation when official server unavailable  
 - **Progress Tracking**: Real-time progress notifications with unique tokens
-- **Robust Validation**: Comprehensive input validation and error handling
+- **Pydantic Validation**: Fixed CallToolResult content structure validation errors
+- **Content Extraction**: Robust handling of various result formats (tuples, dicts, objects)
+- **Error Resilience**: Comprehensive input validation and error handling
 
 ## Architecture
 

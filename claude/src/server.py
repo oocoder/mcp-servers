@@ -3,7 +3,7 @@
 MCP Server Wrapper for Official Claude MCP Server with Progress Flow Support.
 This server wraps the official 'claude mcp serve' and adds MCP progress notifications.
 
-Version: 1.2.0
+Version: 1.3.0
 """
 
 import asyncio
@@ -98,7 +98,8 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any] | None) -> CallT
         return await handle_task_tool(arguments or {})
     else:
         return CallToolResult(
-            content=[TextContent(type="text", text=f"Error: Unknown tool '{name}'. Available tool: Task")]
+            content=[TextContent(type="text", text=f"Error: Unknown tool '{name}'. Available tool: Task")],
+            isError=True
         )
 
 
@@ -111,7 +112,8 @@ async def handle_task_tool(arguments: Dict[str, Any]) -> CallToolResult:
     
     if not prompt:
         return CallToolResult(
-            content=[TextContent(type="text", text="Error: 'prompt' parameter is required for Task tool")]
+            content=[TextContent(type="text", text="Error: 'prompt' parameter is required for Task tool")],
+            isError=True
         )
     
     # Generate progress token if not provided
@@ -163,11 +165,46 @@ async def handle_task_tool(arguments: Dict[str, Any]) -> CallToolResult:
                     
                     await send_progress_notification(progress_token, 80, 100, "Receiving results from Claude server...")
                     
+                    # Safely extract content from result, handling various formats
+                    def extract_text_content(result_obj):
+                        """Safely extract text content from CallToolResult, handling different formats."""
+                        if not hasattr(result_obj, 'content') or not result_obj.content:
+                            return "No content available"
+                        
+                        # Handle list of content objects
+                        content_item = result_obj.content[0]
+                        
+                        # Handle proper TextContent objects
+                        if hasattr(content_item, 'text'):
+                            return content_item.text
+                        
+                        # Handle raw dictionaries or tuples (the error case)
+                        if isinstance(content_item, dict) and 'text' in content_item:
+                            return content_item['text']
+                        elif isinstance(content_item, tuple) and len(content_item) >= 2:
+                            # Handle tuple format like ('type', 'text_content') or ('text', TextContent(...))
+                            if hasattr(content_item[1], 'text'):
+                                return content_item[1].text
+                            elif isinstance(content_item[1], str):
+                                return content_item[1]
+                        
+                        # Fallback for unexpected formats
+                        return str(content_item)
+                    
                     if result.isError:
-                        response_text = f"🤖 Claude MCP Server Wrapper [{task_id}]\n📍 Working Directory: {working_dir}\n🔗 Progress Token: {progress_token}\n\n❌ Error from Official Claude Server:\n{result.content[0].text if result.content else 'Unknown error'}"
+                        error_content = extract_text_content(result)
+                        response_text = f"🤖 Claude MCP Server Wrapper [{task_id}]\n📍 Working Directory: {working_dir}\n🔗 Progress Token: {progress_token}\n\n❌ Error from Official Claude Server:\n{error_content}"
+                        
+                        await send_progress_notification(progress_token, 100, 100, "Task execution failed")
+                        
+                        # Return error response with proper format
+                        return CallToolResult(
+                            content=[TextContent(type="text", text=response_text)],
+                            isError=True
+                        )
                     else:
                         # Extract the response content from the official server
-                        official_response = result.content[0].text if result.content else "Task completed successfully"
+                        official_response = extract_text_content(result)
                         
                         response_text = f"""🤖 Claude MCP Server Wrapper [{task_id}]
 📍 Working Directory: {working_dir}
@@ -185,8 +222,10 @@ async def handle_task_tool(arguments: Dict[str, Any]) -> CallToolResult:
                     
                     await send_progress_notification(progress_token, 100, 100, "Task execution complete")
                     
+                    # Ensure proper CallToolResult format
                     return CallToolResult(
-                        content=[TextContent(type="text", text=response_text)]
+                        content=[TextContent(type="text", text=response_text)],
+                        isError=False
                     )
                     
         except Exception as delegation_error:
@@ -219,12 +258,14 @@ The official Claude MCP server would have full access to:
             await send_progress_notification(progress_token, 100, 100, "Simulation complete")
             
             return CallToolResult(
-                content=[TextContent(type="text", text=simulation_response)]
+                content=[TextContent(type="text", text=simulation_response)],
+                isError=False
             )
         
     except Exception as e:
         return CallToolResult(
-            content=[TextContent(type="text", text=f"Error in Claude MCP wrapper: {str(e)}")]
+            content=[TextContent(type="text", text=f"Error in Claude MCP wrapper: {str(e)}")],
+            isError=True
         )
     finally:
         # Always clean up progress token
@@ -239,7 +280,7 @@ async def main():
             write_stream,
             InitializationOptions(
                 server_name="claude-wrapper-server",
-                server_version="1.1.0",
+                server_version="1.3.0",
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={
@@ -251,7 +292,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("🚀 Starting Claude MCP Server Wrapper v1.1.0")
+    print("🚀 Starting Claude MCP Server Wrapper v1.3.0")
     print("📡 Wrapping official 'claude mcp serve' with progress flow support")
     print("🔗 MCP Progress Notifications: Enabled")
     asyncio.run(main())
