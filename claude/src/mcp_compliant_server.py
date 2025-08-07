@@ -2,6 +2,8 @@
 """
 MCP-compliant minimal server with Task and TodoWrite tools.
 Fully implements MCP progress notification specification.
+
+Version: 1.1.0
 """
 
 import asyncio

@@ -1,4 +1,4 @@
-# Claude MCP Server
+# Claude MCP Server v1.1
 
 Professional Model Context Protocol (MCP) server providing complete development capabilities through Claude's built-in MCP server and comprehensive testing framework.
 
