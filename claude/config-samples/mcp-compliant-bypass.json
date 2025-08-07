@@ -3,7 +3,7 @@
     "mcp-compliant-claude": {
       "command": "python3",
       "args": [
-        "/Users/alexmaldonado/projects/mcp-servers/claude/mcp_compliant_server.py",
+        "./src/mcp_compliant_server.py",
         "--permission-mode",
         "bypassPermissions"
       ],
