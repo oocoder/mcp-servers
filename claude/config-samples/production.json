@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "claude": {
+      "command": "claude",
+      "args": ["mcp", "serve"],
+      "env": {
+        "CLAUDE_MAX_TOKENS": "8000",
+        "CLAUDE_TIMEOUT": "300000"
+      }
+    }
+  }
+}

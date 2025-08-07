@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "claude-code": {
+      "command": "claude",
+      "args": ["mcp", "serve", "--permission-mode", "bypassPermissions"]
+    },
+    "claude-task-executor": {
+      "command": "python3",
+      "args": ["./task_executor_server.py"]
+    }
+  }
+}

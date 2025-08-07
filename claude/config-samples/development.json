@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "claude": {
+      "command": "claude",
+      "args": ["mcp", "serve", "--permission-mode", "bypassPermissions", "--debug"]
+    }
+  }
+}

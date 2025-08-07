@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "claude-code": {
+      "command": "claude",
+      "args": ["mcp", "serve"]
+    },
+    "claude-task-executor": {
+      "command": "python3",
+      "args": ["./task_executor_server.py"]
+    }
+  }
+}
