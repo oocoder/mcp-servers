@@ -37,6 +37,8 @@ class PDFProcessor:
     def __init__(self, cache_dir: Optional[Path] = None):
         self.cache_dir = cache_dir or Path.cwd() / "cache"
         self.cache_dir.mkdir(exist_ok=True)
+        self.markdown_cache_dir = self.cache_dir / "markdown"
+        self.markdown_cache_dir.mkdir(exist_ok=True)
     
     def _normalize_url_for_cache(self, url: str) -> str:
         """Normalize URL for consistent caching by removing fragments and irrelevant parameters"""
@@ -77,6 +79,55 @@ class PDFProcessor:
             logger.info(f"URL normalized for caching: {url} -> {normalized}")
         
         return normalized
+    
+    def _get_conversion_cache_key(self, url: str, start_page: Optional[int] = None, end_page: Optional[int] = None, force_method: Optional[str] = None) -> str:
+        """Generate cache key for markdown conversion results"""
+        normalized_url = self._normalize_url_for_cache(url)
+        
+        # Include conversion parameters in cache key
+        params = {
+            'url': normalized_url,
+            'start_page': start_page,
+            'end_page': end_page,
+            'force_method': force_method,
+            'marker_available': MARKER_AVAILABLE
+        }
+        
+        # Create deterministic hash of parameters
+        params_str = json.dumps(params, sort_keys=True)
+        cache_key = hashlib.md5(params_str.encode()).hexdigest()
+        return cache_key
+    
+    def _get_cached_markdown(self, cache_key: str) -> Optional[str]:
+        """Retrieve cached markdown conversion if available"""
+        cache_file = self.markdown_cache_dir / f"{cache_key}.md"
+        
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                logger.info(f"Using cached markdown conversion: {cache_file.name}")
+                return content
+            except Exception as e:
+                logger.warning(f"Failed to read cached markdown {cache_file}: {e}")
+                # Clean up corrupted cache file
+                try:
+                    cache_file.unlink()
+                except:
+                    pass
+        
+        return None
+    
+    def _cache_markdown(self, cache_key: str, markdown_content: str) -> None:
+        """Cache markdown conversion result"""
+        cache_file = self.markdown_cache_dir / f"{cache_key}.md"
+        
+        try:
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                f.write(markdown_content)
+            logger.info(f"Cached markdown conversion: {cache_file.name} ({len(markdown_content)} chars)")
+        except Exception as e:
+            logger.warning(f"Failed to cache markdown {cache_file}: {e}")
         
     async def download_pdf(self, url: str) -> Optional[Path]:
         """Download PDF from URL and cache it"""
@@ -338,7 +389,15 @@ class PDFProcessor:
             return self._convert_pdf_to_markdown_pymupdf(pdf_path)
     
     def convert_pdf_to_markdown(self, pdf_path: Path, start_page: int = None, end_page: int = None, source_url: str = "", force_method: str = None) -> str:
-        """Convert PDF to Claude-optimized markdown with automatic method selection"""
+        """Convert PDF to Claude-optimized markdown with automatic method selection and caching"""
+        # Check cache first
+        if source_url:
+            cache_key = self._get_conversion_cache_key(source_url, start_page, end_page, force_method)
+            cached_result = self._get_cached_markdown(cache_key)
+            if cached_result:
+                return cached_result
+        
+        # Determine conversion method
         if force_method == "marker":
             use_marker = True
         elif force_method == "pymupdf":
@@ -353,13 +412,22 @@ class PDFProcessor:
             use_marker = False
             logger.info("Using PyMuPDF for fast general-purpose conversion")
         
+        # Perform conversion
+        markdown_result = None
         if use_marker:
             try:
-                return self.convert_pdf_to_markdown_with_marker(pdf_path)
+                markdown_result = self.convert_pdf_to_markdown_with_marker(pdf_path)
             except Exception as e:
                 logger.warning(f"marker-pdf failed, falling back to PyMuPDF: {e}")
         
-        return self._convert_pdf_to_markdown_pymupdf(pdf_path, start_page, end_page)
+        if markdown_result is None:
+            markdown_result = self._convert_pdf_to_markdown_pymupdf(pdf_path, start_page, end_page)
+        
+        # Cache the result if we have a source URL
+        if source_url and markdown_result:
+            self._cache_markdown(cache_key, markdown_result)
+        
+        return markdown_result
     
     def _convert_pdf_to_markdown_pymupdf(self, pdf_path: Path, start_page: int = None, end_page: int = None) -> str:
         """Convert PDF to Claude-optimized markdown using PyMuPDF"""
@@ -1517,7 +1585,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
 async def main():
     """Main entry point"""
     try:
-        async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+        from mcp.server.stdio import stdio_server
+        async with stdio_server() as (read_stream, write_stream):
             await server.run(
                 read_stream,
                 write_stream,
