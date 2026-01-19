@@ -1,11 +1,10 @@
 {
   "mcpServers": {
     "pdf-processor": {
-      "command": "python3",
-      "args": ["/Users/alexmaldonado/projects/mcp-servers/pdf-processor/src/mcp_pdf_server.py"],
+      "command": "uv",
+      "args": ["run", "--script", "/Users/alexmaldonado/projects/mcp-servers/pdf-processor/src/mcp_pdf_server.py"],
       "cwd": "/Users/alexmaldonado/projects/mcp-servers/pdf-processor",
       "env": {
-        "PYTHONPATH": "/Users/alexmaldonado/projects/mcp-servers/pdf-processor/src",
         "PYTHONUNBUFFERED": "1",
         "PYTHONWARNINGS": "ignore::DeprecationWarning"
       }

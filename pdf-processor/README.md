@@ -12,27 +12,76 @@ Professional MCP server that converts PDFs to markdown using intelligent academi
 
 ## Installation
 
+### Quick Setup (Recommended)
+
 ```bash
+# 1. Navigate to the project directory
+cd pdf-processor
+
+# 2. Create a virtual environment
+python3 -m venv venv
+
+# 3. Activate the virtual environment
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 4. Install dependencies
 pip install -r mcp_requirements.txt
+
+# 5. Verify setup
+python3 verify_setup.py
 ```
 
-## Configuration
+The MCP config is already set up to use the virtual environment. After installation, you can use:
 
-### Option 1: Use included config
 ```bash
 claude code --mcp-config /path/to/pdf-processor/mcp-config.json
 ```
 
-### Option 2: Add to your Claude MCP config
+### Manual Installation
+
+If you prefer not to use a virtual environment:
+
+```bash
+pip install --user -r mcp_requirements.txt
+```
+
+Then update `mcp-config.json` line 4 to use your system Python:
+```json
+"command": "python3",
+```
+
+## Verification
+
+Run the verification script to check your setup:
+
+```bash
+python3 verify_setup.py
+```
+
+This will check:
+- ✓ Python version compatibility
+- ✓ All required dependencies
+- ✓ MCP configuration validity
+- ✓ Server script functionality
+- ✓ MCP protocol communication
+
+## Configuration
+
+The included `mcp-config.json` is pre-configured and ready to use. It points to the virtual environment Python by default.
+
+### Custom Configuration
+
+To add to your own Claude MCP config:
+
 ```json
 {
   "mcpServers": {
     "pdf-processor": {
-      "command": "python3",
-      "args": ["/path/to/pdf-processor/src/mcp_pdf_server.py"],
-      "cwd": "/path/to/pdf-processor",
+      "command": "/absolute/path/to/pdf-processor/venv/bin/python3",
+      "args": ["/absolute/path/to/pdf-processor/src/mcp_pdf_server.py"],
+      "cwd": "/absolute/path/to/pdf-processor",
       "env": {
-        "PYTHONPATH": "/path/to/pdf-processor/src",
+        "PYTHONPATH": "/absolute/path/to/pdf-processor/src",
         "PYTHONUNBUFFERED": "1",
         "PYTHONWARNINGS": "ignore::DeprecationWarning"
       }

@@ -1,4 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "aiofiles",
+#     "aiohttp",
+#     "beautifulsoup4",
+#     "PyMuPDF",
+#     "mcp",
+#     "marker-pdf",
+# ]
+# ///
 """MCP Server for PDF URL Crawling and Conversion"""
 
 import asyncio
@@ -32,7 +43,7 @@ from mcp.types import Resource, Tool, TextContent, ImageContent, EmbeddedResourc
 import mcp.server.stdio
 
 class PDFProcessor:
-    """Handles PDF downloading and conversion to Claude-optimized markdown"""
+    """Handles PDF downloading and conversion to markdown"""
     
     def __init__(self, cache_dir: Optional[Path] = None):
         self.cache_dir = cache_dir or Path.cwd() / "cache"
@@ -389,7 +400,7 @@ class PDFProcessor:
             return self._convert_pdf_to_markdown_pymupdf(pdf_path)
     
     def convert_pdf_to_markdown(self, pdf_path: Path, start_page: int = None, end_page: int = None, source_url: str = "", force_method: str = None) -> str:
-        """Convert PDF to Claude-optimized markdown with automatic method selection and caching"""
+        """Convert PDF to markdown with automatic method selection and caching"""
         # Check cache first
         if source_url:
             cache_key = self._get_conversion_cache_key(source_url, start_page, end_page, force_method)
@@ -430,7 +441,7 @@ class PDFProcessor:
         return markdown_result
     
     def _convert_pdf_to_markdown_pymupdf(self, pdf_path: Path, start_page: int = None, end_page: int = None) -> str:
-        """Convert PDF to Claude-optimized markdown using PyMuPDF"""
+        """Convert PDF to markdown using PyMuPDF"""
         try:
             doc = fitz.open(str(pdf_path))
             markdown_content = []
@@ -460,9 +471,9 @@ class PDFProcessor:
                 
                 markdown_content.append("")
                 
-                # Add Claude Code optimization hints
-                markdown_content.append("## 🤖 Claude Code Integration Notes")
-                markdown_content.append("- This document has been optimized for Claude Code analysis")
+                # Add LLM optimization hints
+                markdown_content.append("## 🤖 Processing Notes")
+                markdown_content.append("- This document has been optimized for large language model analysis")
                 markdown_content.append("- Mathematical formulas are preserved in LaTeX format")
                 markdown_content.append("- Code blocks and algorithms are clearly marked")
                 markdown_content.append("- Tables and figures are structurally annotated")
@@ -513,8 +524,8 @@ class PDFProcessor:
                         markdown_content.append("```")
                         markdown_content.append("")
                     elif section['type'] == 'table':
-                        # Format tables for Claude Code
-                        markdown_content.append(self._format_table_for_claude(section['data']))
+                        # Format tables for LLM
+                        markdown_content.append(self._format_table_for_llm(section['data']))
                         markdown_content.append("")
                     elif section['type'] == 'math':
                         # Format mathematical expressions
@@ -529,8 +540,8 @@ class PDFProcessor:
             
             doc.close()
             
-            # Final Claude Code optimization
-            final_content = self._apply_claude_optimizations("\n".join(markdown_content))
+            # Final LLM optimization
+            final_content = self._apply_llm_optimizations("\n".join(markdown_content))
             return final_content
             
         except Exception as e:
@@ -599,7 +610,7 @@ class PDFProcessor:
         return list(set(expressions))  # Remove duplicates
     
     def _organize_content_by_structure(self, text_dict: Dict) -> List[Dict]:
-        """Organize content by structural elements for Claude Code"""
+        """Organize content by structural elements for LLM consumption"""
         sections = []
         
         for block in text_dict["blocks"]:
@@ -712,7 +723,7 @@ class PDFProcessor:
         return any(indicator in text for indicator in math_indicators)
     
     def _clean_paragraph_text(self, text: str) -> str:
-        """Clean and format paragraph text for Claude Code"""
+        """Clean and format paragraph text for LLM consumption"""
         # Remove excessive whitespace
         text = re.sub(r'\s+', ' ', text)
         
@@ -778,14 +789,14 @@ class PDFProcessor:
             logger.error(f"Error validating PDF relevance: {e}")
             return True  # Default to allowing PDF if validation fails
     
-    def _format_table_for_claude(self, table_data: Any) -> str:
-        """Format table data for Claude Code analysis"""
+    def _format_table_for_llm(self, table_data: Any) -> str:
+        """Format table data for LLM analysis"""
         # Placeholder for table formatting
         # In a full implementation, this would parse actual table data
         return "| Column 1 | Column 2 | Column 3 |\n|----------|----------|----------|\n| Data     | Data     | Data     |"
     
-    def _apply_claude_optimizations(self, content: str) -> str:
-        """Apply final optimizations for Claude Code"""
+    def _apply_llm_optimizations(self, content: str) -> str:
+        """Apply final optimizations for LLM consumption"""
         # Add section navigation for long documents
         lines = content.split('\n')
         if len(lines) > 100:  # Long document
@@ -795,7 +806,7 @@ class PDFProcessor:
         # Add research paper specific optimizations
         if 'abstract' in content.lower() or 'introduction' in content.lower():
             content = "# 🎓 Research Paper Analysis\n\n" + content
-            content += "\n\n---\n\n## 🤖 Claude Code Analysis Tips\n"
+            content += "\n\n---\n\n## 🤖 Analysis Tips\n"
             content += "- Use Ctrl+F to quickly find specific algorithms or methods\n"
             content += "- Mathematical formulas are in LaTeX format for easy copying\n"
             content += "- Code blocks are clearly marked for implementation reference\n"
