@@ -18,7 +18,8 @@ import tempfile
 import logging
 from pathlib import Path
 from typing import Optional, Dict, Any, List
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
+from urllib.request import url2pathname
 import aiohttp
 import aiofiles
 from bs4 import BeautifulSoup
@@ -53,8 +54,6 @@ class PDFProcessor:
     
     def _normalize_url_for_cache(self, url: str) -> str:
         """Normalize URL for consistent caching by removing fragments and irrelevant parameters"""
-        from urllib.parse import urlparse, urlunparse, parse_qs
-        
         parsed = urlparse(url)
         query_dict = parse_qs(parsed.query) if parsed.query else {}
         
@@ -139,17 +138,60 @@ class PDFProcessor:
             logger.info(f"Cached markdown conversion: {cache_file.name} ({len(markdown_content)} chars)")
         except Exception as e:
             logger.warning(f"Failed to cache markdown {cache_file}: {e}")
-        
+
+    async def _handle_file_url(self, url: str, cache_file: Path) -> Optional[Path]:
+        """Handle file:// URLs by reading from local filesystem."""
+        try:
+            # Parse the file URL and convert to local path
+            parsed = urlparse(url)
+            # url2pathname handles both Unix and Windows file:// URL formats
+            local_path = Path(url2pathname(parsed.path))
+
+            if not local_path.exists():
+                logger.error(f"Local file not found: {local_path}")
+                return None
+
+            if not local_path.is_file():
+                logger.error(f"Path is not a file: {local_path}")
+                return None
+
+            # Read and validate the file
+            async with aiofiles.open(local_path, 'rb') as f:
+                content = await f.read()
+
+            if not content.startswith(b'%PDF-'):
+                logger.error(f"Local file is not a valid PDF: {local_path}")
+                return None
+
+            # Copy to cache for consistency with HTTP downloads
+            async with aiofiles.open(cache_file, 'wb') as f:
+                await f.write(content)
+
+            logger.info(f"Successfully copied local PDF: {local_path} -> {cache_file} ({len(content)} bytes)")
+            return cache_file
+
+        except PermissionError as e:
+            logger.error(f"Permission denied accessing local file {url}: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Error reading local file {url}: {e}")
+            return None
+
     async def download_pdf(self, url: str) -> Optional[Path]:
-        """Download PDF from URL and cache it"""
+        """Download PDF from URL and cache it. Supports http://, https://, and file:// URLs."""
         normalized_url = self._normalize_url_for_cache(url)
         url_hash = hashlib.md5(normalized_url.encode()).hexdigest()
         cache_file = self.cache_dir / f"{url_hash}.pdf"
-        
+
         if cache_file.exists():
             logger.info(f"Using cached PDF: {cache_file}")
             return cache_file
-            
+
+        # Handle file:// URLs - read directly from filesystem
+        if url.lower().startswith('file://'):
+            return await self._handle_file_url(url, cache_file)
+
+        # Handle http:// and https:// URLs
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'application/pdf,application/octet-stream,*/*',
@@ -1267,13 +1309,13 @@ async def list_tools() -> List[Tool]:
         ),
         Tool(
             name="convert_pdf_url",
-            description="Download PDF from URL and convert to Claude-optimized markdown",
+            description="Download PDF from URL and convert to Claude-optimized markdown. Supports http://, https://, and file:// URLs.",
             inputSchema={
-                "type": "object", 
+                "type": "object",
                 "properties": {
                     "url": {
                         "type": "string",
-                        "description": "The PDF URL to download and convert"
+                        "description": "The PDF URL to download and convert (supports http://, https://, and file://)"
                     },
                     "include_metadata": {
                         "type": "boolean",
@@ -1368,13 +1410,13 @@ async def list_tools() -> List[Tool]:
         ),
         Tool(
             name="convert_pdf_url_enhanced",
-            description="Download PDF from URL and convert to markdown using enhanced marker-pdf processing (better layout detection)",
+            description="Download PDF from URL and convert to markdown using enhanced marker-pdf processing. Supports http://, https://, and file:// URLs.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "url": {
                         "type": "string",
-                        "description": "The PDF URL to download and convert"
+                        "description": "The PDF URL to download and convert (supports http://, https://, and file://)"
                     },
                     "fallback_to_pymupdf": {
                         "type": "boolean",
@@ -1387,13 +1429,13 @@ async def list_tools() -> List[Tool]:
         ),
         Tool(
             name="convert_pdf_url_with_method",
-            description="Convert PDF with explicit method choice (marker-pdf or PyMuPDF)",
+            description="Convert PDF with explicit method choice (marker-pdf or PyMuPDF). Supports http://, https://, and file:// URLs.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "url": {
                         "type": "string",
-                        "description": "The PDF URL to download and convert"
+                        "description": "The PDF URL to download and convert (supports http://, https://, and file://)"
                     },
                     "method": {
                         "type": "string",
