@@ -46,6 +46,9 @@ venv/
 ehthumbs.db
 Thumbs.db
 
+# LLM
+next.md
+
 # Project specific
 cache/*.pdf
 marker_output/

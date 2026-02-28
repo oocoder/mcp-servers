@@ -5,9 +5,10 @@ Professional MCP server that converts PDFs to markdown using intelligent academi
 ## Features
 
 - **Intelligent Processing**: Auto-detects academic papers for optimal conversion
-- **Dual Engines**: marker-pdf for academic content, PyMuPDF for general documents  
+- **Dual Engines**: marker-pdf for academic content, PyMuPDF for general documents
 - **Smart Caching**: Hash-based caching prevents redundant processing
 - **Robust Downloads**: Browser headers, redirect handling, content validation
+- **Local File Support**: Process local PDFs via `file://` URLs
 - **Batch Processing**: Convert multiple PDFs in single operations
 
 ## Installation
@@ -94,11 +95,17 @@ To add to your own Claude MCP config:
 
 | Tool | Purpose | Parameters |
 |------|---------|------------|
-| `convert_pdf_url` | Auto-enhanced conversion | `url`, `include_metadata` |
-| `convert_pdf_url_enhanced` | Force marker-pdf processing | `url`, `fallback_to_pymupdf` |
-| `convert_pdf_url_with_method` | Manual method selection | `url`, `method` |
+| `convert_pdf_url` | Auto-enhanced conversion | `url` (http/https/file), `include_metadata` |
+| `convert_pdf_url_enhanced` | Force marker-pdf processing | `url` (http/https/file), `fallback_to_pymupdf` |
+| `convert_pdf_url_with_method` | Manual method selection | `url` (http/https/file), `method` |
 | `crawl_pdf_links` | Extract PDF links from pages | `url`, `max_depth` |
-| `batch_convert_pdfs` | Process multiple PDFs | `urls`, `include_metadata` |
+| `batch_convert_pdfs` | Process multiple PDFs | `urls` (http/https/file), `include_metadata` |
+
+### URL Support
+
+All PDF conversion tools support multiple URL schemes:
+- **HTTP/HTTPS**: Remote PDFs from web servers
+- **file://**: Local PDF files (e.g., `file:///path/to/document.pdf`)
 
 ## Processing Engines
 
