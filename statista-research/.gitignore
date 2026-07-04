@@ -1,0 +1,4 @@
+# Live browser session — NEVER commit (holds your authenticated library cookies)
+cache/
+# Deno
+deno.lock

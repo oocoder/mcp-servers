@@ -1,0 +1,575 @@
+<title>CKS — Orlando Flooring Network Capacity Model</title>
+<style>
+  :root {
+    --bg: #eeece4;
+    --surface: #f8f6f0;
+    --surface-2: #ffffff;
+    --ink: #24231f;
+    --ink-2: #58544a;
+    --ink-3: #8a8474;
+    --line: #d3cebd;
+    --line-strong: #b3ac97;
+    --accent: #a8632e;
+    --accent-ink: #ffffff;
+    --ok: #4b7a63;
+    --tight: #96780f;
+    --impossible: #a8432f;
+    --chart-demand: #a8632e;
+    --chart-baseline: #2d6fa8;
+    --chart-friction: #9c4560;
+    --chip-bg: #00000010;
+    --shadow: 0 1px 2px rgba(30, 27, 18, 0.06), 0 4px 16px rgba(30, 27, 18, 0.05);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10233d;
+      --surface: #15304f;
+      --surface-2: #193a5e;
+      --ink: #e8eef5;
+      --ink-2: #a9bcd0;
+      --ink-3: #7793ad;
+      --line: #2c4a6c;
+      --line-strong: #3c5f85;
+      --accent: #e0954f;
+      --accent-ink: #10233d;
+      --ok: #6fbf97;
+      --tight: #d9a83e;
+      --impossible: #e2725b;
+      --chart-demand: #c06b30;
+      --chart-baseline: #4a8fc2;
+      --chart-friction: #c4638c;
+      --chip-bg: #ffffff14;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10233d; --surface: #15304f; --surface-2: #193a5e; --ink: #e8eef5; --ink-2: #a9bcd0;
+    --ink-3: #7793ad; --line: #2c4a6c; --line-strong: #3c5f85; --accent: #e0954f; --accent-ink: #10233d;
+    --ok: #6fbf97; --tight: #d9a83e; --impossible: #e2725b; --chart-demand: #c06b30;
+    --chart-baseline: #4a8fc2; --chart-friction: #c4638c; --chip-bg: #ffffff14;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #eeece4; --surface: #f8f6f0; --surface-2: #ffffff; --ink: #24231f; --ink-2: #58544a;
+    --ink-3: #8a8474; --line: #d3cebd; --line-strong: #b3ac97; --accent: #a8632e; --accent-ink: #ffffff;
+    --ok: #4b7a63; --tight: #96780f; --impossible: #a8432f; --chart-demand: #a8632e;
+    --chart-baseline: #2d6fa8; --chart-friction: #9c4560; --chip-bg: #00000010;
+    --shadow: 0 1px 2px rgba(30,27,18,.06), 0 4px 16px rgba(30,27,18,.05); color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 80px;
+  }
+  .page { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 36px; }
+
+  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  .serif { font-family: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif; }
+
+  /* ---------- masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 10px; border-bottom: 2px solid var(--ink); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 600;
+  }
+  h1.serif { font-size: 30px; line-height: 1.15; margin: 0; text-wrap: balance; font-weight: 600; }
+  .masthead-meta { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 13px; color: var(--ink-2); }
+  .masthead-meta span b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- stat strip ---------- */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .stat-tile { background: var(--surface); padding: 16px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .stat-tile .label { font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  .stat-tile .value { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 21px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stat-tile .value.accent { color: var(--accent); }
+  .stat-tile .sub { font-size: 11.5px; color: var(--ink-2); }
+
+  /* ---------- sections ---------- */
+  section { display: flex; flex-direction: column; gap: 14px; }
+  .section-head { display: flex; flex-direction: column; gap: 3px; }
+  h2 { font-size: 19px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+  .section-head p { margin: 0; font-size: 13.5px; color: var(--ink-2); max-width: 62ch; }
+
+  /* ---------- derivation panels ---------- */
+  .derivation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .derivation-grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; }
+  .panel h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2); font-weight: 700; }
+  .chain { display: flex; flex-direction: column; gap: 0; }
+  .chain-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .chain-row:last-child { border-bottom: none; padding-top: 9px; margin-top: 3px; border-top: 1px solid var(--line-strong); font-weight: 700; }
+  .chain-row .k { color: var(--ink-2); }
+  .chain-row .v { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+  .tag { display: inline-block; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 9.5px; letter-spacing: 0.04em; padding: 1px 5px; border-radius: 3px; margin-right: 5px; font-weight: 700; }
+  .tag-statista { background: #2d6fa822; color: var(--chart-baseline); }
+  .tag-bls { background: #4b7a6322; color: var(--ok); }
+  .tag-refsol { background: #a8632e22; color: var(--chart-demand); }
+  .tag-assumption { background: var(--chip-bg); color: var(--ink-2); }
+  .tbl-cap { margin: 4px 0 -6px; font-size: 13px; font-weight: 600; color: var(--ink-2); display: flex; align-items: center; gap: 2px; }
+  .tbl-note { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-2); line-height: 1.5; max-width: 82ch; }
+
+  /* ---------- table ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 900px; background: var(--surface); }
+  thead th {
+    position: sticky; top: 0; background: var(--surface-2); text-align: right; font-size: 10.5px;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2); font-weight: 700;
+    padding: 10px 12px; border-bottom: 2px solid var(--line-strong); white-space: nowrap;
+  }
+  thead th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface-2); z-index: 1; }
+  tbody td { padding: 9px 12px; text-align: right; font-size: 13px; border-bottom: 1px solid var(--line); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.capped td { background: color-mix(in srgb, var(--tight) 7%, transparent); }
+  td.yr { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-weight: 600; }
+  td.yr .tag-cap { display: block; font-family: ui-monospace, monospace; font-size: 9.5px; color: var(--tight); font-weight: 700; letter-spacing: 0.03em; margin-top: 1px; }
+  .growth-pos { color: var(--ok); }
+  .growth-zero { color: var(--ink-3); }
+  .pill { display: inline-flex; align-items: center; gap: 4px; font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.02em; }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .pill-ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+  .pill-ok::before { background: var(--ok); }
+  .pill-tight { color: var(--tight); background: color-mix(in srgb, var(--tight) 16%, transparent); }
+  .pill-tight::before { background: var(--tight); }
+  .pill-impossible { color: var(--impossible); background: color-mix(in srgb, var(--impossible) 16%, transparent); }
+  .pill-impossible::before { background: var(--impossible); }
+
+  /* ---------- chart ---------- */
+  .chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px 14px; box-shadow: var(--shadow); }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 6px; font-size: 12px; color: var(--ink-2); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .legend-swatch.dashed { background: repeating-linear-gradient(to right, currentColor 0 6px, transparent 6px 10px); height: 2px; }
+  #chart-wrap { position: relative; width: 100%; overflow-x: auto; }
+  #chart-svg { width: 100%; height: auto; display: block; min-width: 560px; }
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 6px; padding: 8px 10px; font-size: 12px; box-shadow: var(--shadow); opacity: 0; transition: opacity 0.1s;
+    white-space: nowrap; z-index: 5;
+  }
+  .tooltip .t-year { font-weight: 700; margin-bottom: 4px; font-family: -apple-system, sans-serif; }
+  .tooltip .t-row { display: flex; justify-content: space-between; gap: 14px; font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .tooltip .t-row .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+  /* ---------- callout ---------- */
+  .callout { border: 1px solid var(--impossible); border-left-width: 4px; background: color-mix(in srgb, var(--impossible) 8%, var(--surface)); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+  .callout .head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: var(--impossible); }
+  .callout p { margin: 0; font-size: 13.5px; color: var(--ink); line-height: 1.5; }
+  .callout p.sub { color: var(--ink-2); font-size: 12.5px; }
+
+  /* ---------- footer / methodology ---------- */
+  .methodology { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--ink-2); }
+  .methodology li { margin-bottom: 4px; }
+  .lever-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 24px; font-size: 12.5px; }
+  @media (max-width: 620px) { .lever-grid { grid-template-columns: 1fr; } }
+  .lever-grid div { display: flex; justify-content: space-between; border-bottom: 1px dotted var(--line); padding: 4px 0; }
+  .lever-grid .lk { color: var(--ink-2); } .lever-grid .lv { font-family: ui-monospace, monospace; color: var(--ink); }
+  footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 11.5px; color: var(--ink-3); }
+</style>
+
+<div class="page">
+
+  <div class="masthead">
+    <div class="eyebrow">Capacity &amp; Market Model — Draft for Discussion</div>
+    <h1 class="serif">CKS — Orlando Flooring Subcontractor Network</h1>
+    <div class="masthead-meta">
+      <span>Scope: <b>Property-manager unit-turn flooring installs, Orlando MSA</b></span>
+      <span>Horizon: <b>Years 0–9</b> (20 → 200 accounts, +20/yr)</span>
+      <span>Prepared: <b>Jul 2026</b></span>
+    </div>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat-tile">
+      <div class="label">Local PM-turn SAM</div>
+      <div class="value">$30.6M</div>
+      <div class="sub">all competitors, Orlando MSA</div>
+    </div>
+    <div class="stat-tile">
+      <div class="label">CKS revenue ceiling</div>
+      <div class="value accent">~$7.6M/yr</div>
+      <div class="sub">at a defensible 25% obtainable share</div>
+    </div>
+    <div class="stat-tile">
+      <div class="label">Year 1 growth</div>
+      <div class="value">+50% <span style="font-size:13px;color:var(--ink-3);font-family:-apple-system,sans-serif;">YoY</span></div>
+      <div class="sub">decelerating to 0% by Year 6</div>
+    </div>
+    <div class="stat-tile">
+      <div class="label">Impossible-to-scale point</div>
+      <div class="value" style="color:var(--impossible);">Year 8†</div>
+      <div class="sub">only if share cap is broken (see below)</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <h2>Where the ceiling comes from</h2>
+      <p>Two independent constraints cap revenue regardless of how many logos get signed: the size of the obtainable local market (SOM), and the number of installer crews the Orlando labor pool can actually field.</p>
+    </div>
+    <div class="derivation-grid">
+      <div class="panel">
+        <h3>Market-size ceiling (SOM)</h3>
+        <div class="chain">
+          <div class="chain-row"><span class="k"><span class="tag tag-statista">STATISTA</span>FL flooring-contractor revenue, 2024</span><span class="v">$1,697.5M</span></div>
+          <div class="chain-row"><span class="k"><span class="tag tag-assumption">ASSUM.</span>× Orlando MSA pop. share (~12%)</span><span class="v">$203.7M</span></div>
+          <div class="chain-row"><span class="k"><span class="tag tag-assumption">ASSUM.</span>× PM/multifamily-turn niche (~15%)</span><span class="v">$30.6M</span></div>
+          <div class="chain-row"><span class="k">× CKS obtainable share (ramps 8%→25%)</span><span class="v">$2.4M → $7.6M</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Labor-supply ceiling</h3>
+        <div class="chain">
+          <div class="chain-row"><span class="k"><span class="tag tag-refsol">REFSOL</span>Flooring-contractor firms, Orlando 4-county (NAICS 238330)</span><span class="v">398 firms</span></div>
+          <div class="chain-row"><span class="k"><span class="tag tag-assumption">CORE</span>Orange County only (Orlando core)</span><span class="v">234 firms</span></div>
+          <div class="chain-row"><span class="k">= local crew pool (firms ≈ crews)</span><span class="v">398 crews</span></div>
+          <div class="chain-row"><span class="k">× willing-share (baseline 30% / friction 17%)</span><span class="v">119 / 68 reachable</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>The growth path</h2>
+      <p>Revenue is capped at min(demand from signed accounts, SOM ceiling). "Capped" rows are bound by market size, not by CKS's ability to sell or staff further.</p>
+    </div>
+    <div class="table-wrap">
+      <table id="proj-table"></table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Crews needed vs. crews available</h2>
+      <p>The demand line is CKS's required onboarded roster each year. The two flat-ish lines are the local supply ceiling under normal conditions and under elevated deportation-fear friction (reduced willing-share, higher no-show/refusal — construction/extraction occupations are 9.8% foreign-born-held vs. 4.2% for native-born, a 2.3× overrepresentation, so this friction is not a marginal effect on this specific labor pool).</p>
+    </div>
+    <div class="chart-card">
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--chart-demand)"></span>Crews needed (roster)</div>
+        <div class="legend-item"><span class="legend-swatch dashed" style="color:var(--chart-baseline)"></span>Available — baseline</div>
+        <div class="legend-item"><span class="legend-swatch dashed" style="color:var(--chart-friction)"></span>Available — friction scenario</div>
+      </div>
+      <div id="chart-wrap">
+        <svg id="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="tooltip"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Take-home: revenue is not the story, net income is</h2>
+      <p>In a 1099-labor passthrough business, most of every billed dollar leaves as crew pay and materials. Below is the P&amp;L under two models. Note the shape in both: fixed overhead drags Year 0 to a loss, then <b>net margin climbs every year</b> as revenue dilutes that fixed cost — classic operating leverage — until the market-size ceiling caps it around Year 6.</p>
+    </div>
+    <h3 class="tbl-cap"><span class="tag tag-assumption">MODEL A</span> GC / full-ticket — CKS bills the whole job, pays crew + materials out of it</h3>
+    <div class="table-wrap">
+      <table id="ni-table"></table>
+    </div>
+    <h3 class="tbl-cap"><span class="tag tag-assumption">MODEL B</span> Marketplace — CKS takes an 18% fee on job value; crew &amp; materials paid around it</h3>
+    <div class="table-wrap">
+      <table id="mp-table"></table>
+    </div>
+    <p class="tbl-note">Same take-home order of magnitude either way (~$860K vs ~$525K at ceiling). GC posts higher <i>absolute</i> net on a much bigger revenue base; the marketplace posts a higher <i>percentage</i> margin (38%) because CKS never touches the crew/material cost — it only ever books the fee. Which one to run is an operations question (do you want to carry payroll and materials risk?), not a profit question.</p>
+    <div class="derivation-grid">
+      <div class="panel">
+        <h3>The two business models land in the same place</h3>
+        <div class="chain">
+          <div class="chain-row"><span class="k">GC / full-ticket — net at ceiling</span><span class="v">~$860K/yr (11% of $7.6M)</span></div>
+          <div class="chain-row"><span class="k">Marketplace / 18% fee — net at ceiling</span><span class="v">~$525K/yr (38% of $1.4M)</span></div>
+          <div class="chain-row"><span class="k">Single-market take-home ceiling</span><span class="v">low-to-mid six figures</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Sensitivity — the crew-payout assumption dominates</h3>
+        <p style="margin:0;font-size:13px;color:var(--ink-2);line-height:1.5;">Net margin swings hard on what the 1099 crew keeps. At a <b>48% payout + 20% materials</b> → ~11% net. If crews command <b>55% + 25% materials</b> (tight-labor pricing power), gross falls to ~20% and net compresses to <b>~4–6%</b> — i.e. ~$300–450K at the same ceiling. The friction scenario (deportation fear → scarcer crews) pushes payout <i>up</i>, so it hits margin as well as capacity.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="callout">
+      <div class="head">△ When does it actually become impossible?</div>
+      <p>Not within this 10-year path as modeled — the market-size ceiling (SOM) caps revenue at ~$7.6M/yr around Year 6 <i>before</i> the labor pool is fully exhausted; under friction, the roster sits at ~75% of available crews (tight, not impossible).</p>
+      <p>The wall only appears if CKS breaks past the ~25% share ceiling — e.g. by displacing competitors faster than modeled. Stress-testing an unlocked 60% obtainable share: the <b>friction-scenario roster meets available crews in Year 8</b> (~180 accounts, ~$10.2M revenue, needing 68 crews against 68 reachable). That is the genuine labor wall — it is reached only in a share-dominance scenario, not the base case. With the earlier placeholder firm count it landed a year sooner (Year 7); the real Reference Solutions count of 398 metro firms buys ~one more year of runway.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>How to think about this business — a mental model</h2>
+      <p>One line to carry: <b>CKS is not a flooring company — it's a reliability-and-coordination layer</b> sitting between fragmented property managers (who need unit turns done fast and predictably) and ~400 fragmented local crews (who are variable, and now spooked by enforcement). The product PMs pay for is "one call, floor gets done, on schedule." Everything below follows from that.</p>
+    </div>
+    <div class="derivation-grid">
+      <div class="panel">
+        <h3>The constraint stack — what actually caps the business, in order</h3>
+        <div class="chain">
+          <div class="chain-row"><span class="k"><b>1. Sales / execution</b> — can you sign &amp; service accounts?</span><span class="v">soft, internal</span></div>
+          <div class="chain-row"><span class="k"><b>2. Market size (SOM)</b> — obtainable PM-turn niche in one metro</span><span class="v">~$7.6M ← binds</span></div>
+          <div class="chain-row"><span class="k"><b>3. Labor pool</b> — reachable crews (only bites if you break #2)</span><span class="v">68–119 crews</span></div>
+        </div>
+        <p style="margin:2px 0 0;font-size:12.5px;color:var(--ink-2);line-height:1.5;">The one that binds is <b>#2, market size</b> — not labor. You run out of <i>market</i> before you run out of <i>crews</i>. That single fact reorders every priority below.</p>
+      </div>
+      <div class="panel">
+        <h3>The economic engine — thin spread, high operating leverage</h3>
+        <div class="chain">
+          <div class="chain-row"><span class="k">Gross margin is <b>structurally fixed</b> (~32%)</span><span class="v">crew+materials = 68%</span></div>
+          <div class="chain-row"><span class="k">Below ~$1.5M revenue you <b>lose money</b> (fixed overhead)</span><span class="v">breakeven Yr 1</span></div>
+          <div class="chain-row"><span class="k">Above it, each extra $1 adds <b>~22¢</b> pre-tax contribution (~16¢ after tax)</span><span class="v">→ margin climbs</span></div>
+          <div class="chain-row"><span class="k">…until SOM caps revenue → take-home tops out</span><span class="v">~$860K/yr</span></div>
+        </div>
+        <p style="margin:2px 0 0;font-size:12.5px;color:var(--ink-2);line-height:1.5;">You don't make money per job — you make it on <b>volume × reliability</b>, like a staffing agency. The flywheel: more crews → more reliability → more PMs → more crews. Density is the moat.</p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:4px;">
+      <div class="head">◆ How big is the reliability premium? — anchored to Orlando vacancy economics</div>
+      <p style="margin:0 0 8px;">Why a PM pays CKS a premium instead of coordinating crews itself: the alternative's real cost is <b>vacancy</b> — every day a turned unit can't be re-rented is lost rent.</p>
+      <div class="chain" style="gap:0;">
+        <div class="chain-row"><span class="k"><span class="tag tag-statista">STATISTA</span>Orlando avg apartment rent (Jan 2026)</span><span class="v">$1,502/mo → ~$49/day</span></div>
+        <div class="chain-row"><span class="k"><span class="tag tag-statista">STATISTA</span>Orlando-Kissimmee-Sanford 2BR fair-market rent (2025)</span><span class="v">$1,958/mo → ~$64/day</span></div>
+        <div class="chain-row"><span class="k">A no-show that slips a turn <b>3–5 days</b> costs the PM…</span><span class="v">~$150–320 / unit</span></div>
+      </div>
+      <p style="margin:8px 0 0;">That recovered rent <i>alone</i> — before counting the PM's coordination time — justifies a <b>$150–320 premium per job</b>. The marketplace fee ($360 on a $2,000 job) and the GC markup (~$500 over direct crew price) sit right at or above that line, so the premium <b>pays for itself on vacancy avoidance</b> for any unit where turn-time is genuinely at risk. And Orlando 2BR rent is up <b>48% since 2021</b> — rising rents make fast turns worth more every year, a structural tailwind for CKS's value proposition.</p>
+    </div>
+
+    <div class="callout" style="margin-top:4px;">
+      <div class="head">◆ Sales or labor — where to focus?</div>
+      <p style="margin:0 0 8px;">Neither in the naïve sense. You have <b>enough crews</b> (398 firms; you need ~40–68) and you can sign <b>enough accounts</b> to hit the SOM cap. The real levers, in sequence:</p>
+      <div class="chain" style="gap:0;">
+        <div class="chain-row"><span class="k"><b>Now (below ~$1.5M, near breakeven)</b> → <b>SALES</b></span><span class="v">get over the fixed-cost hump fast</span></div>
+        <div class="chain-row"><span class="k"><b>Scaling up (the real game)</b> → <b>LABOR <i>reliability</i></b>, not headcount</span><span class="v">no-show/churn is the enemy</span></div>
+        <div class="chain-row"><span class="k"><b>At the ceiling</b> → neither — <b>REPLICATE</b> into a new metro</span><span class="v">+$7.6M / +$860K each</span></div>
+      </div>
+      <p style="margin:8px 0 0;">Why reliability over raw labor supply: crew <i>show-up</i> — not crew <i>count</i> — is literally the product a PM pays a premium for, and it's what the model's churn/no-show terms quietly destroy. The deportation-fear friction attacks exactly this (won't-travel, no-show), so investing in crew loyalty — steady work, fast guaranteed pay, local routing — is simultaneously a reliability play <i>and</i> a margin play. Chasing more salespeople past the SOM cap, or more crews past the ~68 you need, both waste money on a constraint that isn't binding.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Methodology &amp; what to replace with real numbers</h2>
+    </div>
+    <ul class="methodology">
+      <li><span class="tag tag-statista">STATISTA</span> Florida flooring-contractor industry revenue, foreign-born/native-born occupational distribution, and Orlando apartment rents ($1,502/mo avg; $1,958/mo 2BR fair-market) — all live-fetched via NYPL-licensed access.</li>
+      <li><span class="tag tag-bls">BLS</span> Orlando-Kissimmee-Sanford MSA OEWS payroll employment for flooring-trade SOC codes (small-cell suppression means this run-to-run undercounts; treated as a floor, not the true count).</li>
+      <li><span class="tag tag-refsol">REFSOL</span> Reference Solutions / Data Axle (ReferenceUSA), NYPL-licensed — live count of flooring-contractor establishments (NAICS 238330, verified businesses) for the Orlando 4-county metro: 398 (234 in Orange County core). This replaces the earlier Census-placeholder firm count as the labor-pool anchor.</li>
+      <li><span class="tag tag-assumption">ASSUMPTION</span> everything else below — swap in CKS's real figures to firm this up.</li>
+    </ul>
+    <div class="lever-grid mono">
+      <div><span class="lk">Ticket size / job</span><span class="lv">$2,000</span></div>
+      <div><span class="lk">Jobs / account / year</span><span class="lv">30</span></div>
+      <div><span class="lk">Flooring-contractor firms (4-county)</span><span class="lv">398 — Reference Solutions / Data Axle, NAICS 238330 (234 Orange core)</span></div>
+      <div><span class="lk">Obtainable share ceiling</span><span class="lv">25% of SAM</span></div>
+      <div><span class="lk">Refusal / no-show (baseline)</span><span class="lv">30% / 15%</span></div>
+      <div><span class="lk">Refusal / no-show (friction)</span><span class="lv">38% / 26%</span></div>
+      <div><span class="lk">Willing-share (baseline / friction)</span><span class="lv">30% / 17%</span></div>
+      <div><span class="lk">Quarterly roster churn</span><span class="lv">35%</span></div>
+    </div>
+  </section>
+
+  <footer>
+    † Stress-test result, not the base-case path. Model: <span class="mono">estimator/projection.ts</span> in the statista-research MCP repo — firm count is live from Reference Solutions; re-run with CKS's real ticket size and job frequency to firm up the rest.
+  </footer>
+
+</div>
+
+<script>
+const DATA = [
+  {y:0, signed:20, eff:20.0, rev:1200000, som:2444429, capped:false, growth:null,
+   base:{need:6.2, avail:119, verdict:"OK"}, fric:{need:8.0, avail:68, verdict:"OK"}},
+  {y:1, signed:40, eff:30.0, rev:1800000, som:3666643, capped:false, growth:0.50,
+   base:{need:9.3, avail:119, verdict:"OK"}, fric:{need:12.1, avail:68, verdict:"OK"}},
+  {y:2, signed:60, eff:50.0, rev:3000000, som:4888858, capped:false, growth:0.667,
+   base:{need:15.5, avail:119, verdict:"OK"}, fric:{need:20.1, avail:68, verdict:"OK"}},
+  {y:3, signed:80, eff:70.0, rev:4200000, som:6111072, capped:false, growth:0.40,
+   base:{need:21.7, avail:119, verdict:"OK"}, fric:{need:28.2, avail:68, verdict:"OK"}},
+  {y:4, signed:100, eff:90.0, rev:5400000, som:6722179, capped:false, growth:0.286,
+   base:{need:27.9, avail:119, verdict:"OK"}, fric:{need:36.2, avail:68, verdict:"OK"}},
+  {y:5, signed:120, eff:110.0, rev:6600000, som:7333286, capped:false, growth:0.222,
+   base:{need:34.1, avail:119, verdict:"OK"}, fric:{need:44.3, avail:68, verdict:"OK"}},
+  {y:6, signed:140, eff:130.0, rev:7638840, som:7638840, capped:true, growth:0.157,
+   base:{need:39.5, avail:119, verdict:"OK"}, fric:{need:51.2, avail:68, verdict:"TIGHT"}},
+  {y:7, signed:160, eff:150.0, rev:7638840, som:7638840, capped:true, growth:0.0,
+   base:{need:39.5, avail:119, verdict:"OK"}, fric:{need:51.2, avail:68, verdict:"TIGHT"}},
+  {y:8, signed:180, eff:170.0, rev:7638840, som:7638840, capped:true, growth:0.0,
+   base:{need:39.5, avail:119, verdict:"OK"}, fric:{need:51.2, avail:68, verdict:"TIGHT"}},
+  {y:9, signed:200, eff:190.0, rev:7638840, som:7638840, capped:true, growth:0.0,
+   base:{need:39.5, avail:119, verdict:"OK"}, fric:{need:51.2, avail:68, verdict:"TIGHT"}},
+];
+
+const fmt$ = n => "$" + (n/1e6).toFixed(2) + "M";
+const fmt0 = n => Math.round(n).toLocaleString();
+const pill = v => `<span class="pill pill-${v.toLowerCase()}">${v}</span>`;
+
+// ---- table ----
+const table = document.getElementById("proj-table");
+table.innerHTML = `
+  <thead><tr>
+    <th>Year</th><th>Accounts (signed)</th><th>Effective</th><th>Revenue</th><th>YoY</th>
+    <th>Baseline: need / avail</th><th></th><th>Friction: need / avail</th><th></th>
+  </tr></thead>
+  <tbody>
+    ${DATA.map(r => `
+      <tr class="${r.capped ? "capped" : ""}">
+        <td class="yr">Year ${r.y}${r.y===0 ? " (now)" : ""}${r.capped ? '<span class="tag-cap">SOM-CAPPED</span>' : ""}</td>
+        <td>${r.signed}</td>
+        <td>${r.eff.toFixed(1)}</td>
+        <td>${fmt$(r.rev)}</td>
+        <td class="${r.growth === null ? "" : r.growth > 0 ? "growth-pos" : "growth-zero"}">${r.growth === null ? "—" : (r.growth*100).toFixed(0)+"%"}</td>
+        <td>${r.base.need.toFixed(1)} / ${r.base.avail}</td>
+        <td>${pill(r.base.verdict)}</td>
+        <td>${r.fric.need.toFixed(1)} / ${r.fric.avail}</td>
+        <td>${pill(r.fric.verdict)}</td>
+      </tr>
+    `).join("")}
+  </tbody>
+`;
+
+// ---- net income table ----
+const NI = [
+  {y:0, billed:1200000, gross:384000, opex:280000, ebit:-16000, net:-16000, m:-0.013},
+  {y:1, billed:1800000, gross:576000, opex:295000, ebit:101000, net:76000, m:0.042},
+  {y:2, billed:3000000, gross:960000, opex:325000, ebit:335000, net:251000, m:0.084},
+  {y:3, billed:4200000, gross:1344000, opex:355000, ebit:569000, net:427000, m:0.102},
+  {y:4, billed:5400000, gross:1728000, opex:385000, ebit:803000, net:602000, m:0.112},
+  {y:5, billed:6600000, gross:2112000, opex:415000, ebit:1040000, net:778000, m:0.118},
+  {y:6, billed:7638840, gross:2444429, opex:445000, ebit:1240000, net:927000, m:0.121},
+  {y:7, billed:7638840, gross:2444429, opex:475000, ebit:1210000, net:904000, m:0.118},
+  {y:8, billed:7638840, gross:2444429, opex:505000, ebit:1180000, net:882000, m:0.115},
+  {y:9, billed:7638840, gross:2444429, opex:535000, ebit:1150000, net:859000, m:0.112},
+];
+const niTable = document.getElementById("ni-table");
+const netCls = v => v < 0 ? "growth-zero" : "growth-pos";
+niTable.innerHTML = `
+  <thead><tr>
+    <th>Year</th><th>Billed revenue</th><th>Gross profit (32%)</th><th>Fixed + var opex</th>
+    <th>EBIT</th><th>Net income</th><th>Net margin</th>
+  </tr></thead>
+  <tbody>
+    ${NI.map(r => `
+      <tr>
+        <td class="yr">Year ${r.y}${r.y===0?" (now)":""}</td>
+        <td>${fmt$(r.billed)}</td>
+        <td>${fmt$(r.gross)}</td>
+        <td>${fmt$(r.opex + r.billed*0.10)}</td>
+        <td class="${netCls(r.ebit)}">${r.ebit<0?"-":""}${fmt$(Math.abs(r.ebit))}</td>
+        <td class="${netCls(r.net)}" style="font-weight:700">${r.net<0?"-":""}${fmt$(Math.abs(r.net))}</td>
+        <td class="${netCls(r.net)}">${(r.m*100).toFixed(1)}%</td>
+      </tr>
+    `).join("")}
+  </tbody>
+`;
+
+// ---- marketplace net income table ----
+const MP = [
+  {y:0, gmv:1200000, fee:216000,  net:-58000, m:-0.267},
+  {y:1, gmv:1800000, fee:324000,  net:10000,  m:0.031},
+  {y:2, gmv:3000000, fee:540000,  net:117000, m:0.216},
+  {y:3, gmv:4200000, fee:756000,  net:224000, m:0.296},
+  {y:4, gmv:5400000, fee:972000,  net:330000, m:0.340},
+  {y:5, gmv:6600000, fee:1188000, net:437000, m:0.368},
+  {y:6, gmv:7638840, fee:1374991, net:527000, m:0.383},
+  {y:7, gmv:7638840, fee:1374991, net:509000, m:0.370},
+  {y:8, gmv:7638840, fee:1374991, net:491000, m:0.357},
+  {y:9, gmv:7638840, fee:1374991, net:473000, m:0.344},
+];
+document.getElementById("mp-table").innerHTML = `
+  <thead><tr>
+    <th>Year</th><th>Job value (GMV)</th><th>Fee revenue (18%)</th>
+    <th>Net income</th><th>Net margin (of fee)</th>
+  </tr></thead>
+  <tbody>
+    ${MP.map(r => `
+      <tr>
+        <td class="yr">Year ${r.y}${r.y===0?" (now)":""}</td>
+        <td>${fmt$(r.gmv)}</td>
+        <td>${fmt$(r.fee)}</td>
+        <td class="${netCls(r.net)}" style="font-weight:700">${r.net<0?"-":""}${fmt$(Math.abs(r.net))}</td>
+        <td class="${netCls(r.net)}">${(r.m*100).toFixed(1)}%</td>
+      </tr>
+    `).join("")}
+  </tbody>
+`;
+
+// ---- chart ----
+(function () {
+  const svg = document.getElementById("chart-svg");
+  const tooltip = document.getElementById("tooltip");
+  const W = 640, H = 300, M = { t: 14, r: 16, b: 28, l: 34 };
+  const plotW = W - M.l - M.r, plotH = H - M.t - M.b;
+
+  const maxY = Math.max(...DATA.map(d => Math.max(d.base.need, d.base.avail, d.fric.need, d.fric.avail))) * 1.08;
+  const x = i => M.l + (i / (DATA.length - 1)) * plotW;
+  const y = v => M.t + plotH - (v / maxY) * plotH;
+
+  const ns = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+
+  // gridlines
+  const gridSteps = 4;
+  for (let g = 0; g <= gridSteps; g++) {
+    const v = (maxY / gridSteps) * g;
+    svg.appendChild(el("line", { x1: M.l, x2: W - M.r, y1: y(v), y2: y(v), stroke: "var(--line)", "stroke-width": 1 }));
+    const label = el("text", { x: M.l - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 10, fill: "var(--ink-3)", "font-family": "ui-monospace,monospace" });
+    label.textContent = Math.round(v);
+    svg.appendChild(label);
+  }
+  // x labels
+  DATA.forEach((d, i) => {
+    const label = el("text", { x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 10, fill: "var(--ink-3)", "font-family": "ui-monospace,monospace" });
+    label.textContent = "Y" + d.y;
+    svg.appendChild(label);
+  });
+
+  function pathFor(key, subkey) {
+    return DATA.map((d, i) => `${i === 0 ? "M" : "L"} ${x(i)} ${y(d[key][subkey])}`).join(" ");
+  }
+  function drawLine(pathD, color, dashed) {
+    svg.appendChild(el("path", {
+      d: pathD, fill: "none", stroke: color, "stroke-width": 2.5,
+      "stroke-linecap": "round", "stroke-dasharray": dashed ? "6 5" : "none",
+    }));
+  }
+  drawLine(pathFor("base", "avail"), "var(--chart-baseline)", true);
+  drawLine(pathFor("fric", "avail"), "var(--chart-friction)", true);
+  drawLine(pathFor("base", "need"), "var(--chart-demand)", false);
+
+  // rounded end marker + hover targets on the demand (need) line, the narrative-critical series
+  DATA.forEach((d, i) => {
+    const cx = x(i), cy = y(d.base.need);
+    const dot = el("circle", { cx, cy, r: 4, fill: "var(--chart-demand)", stroke: "var(--surface)", "stroke-width": 1.5 });
+    svg.appendChild(dot);
+    const hit = el("rect", { x: cx - 14, y: M.t, width: 28, height: plotH, fill: "transparent", style: "cursor:pointer" });
+    hit.addEventListener("mousemove", (ev) => showTip(ev, d));
+    hit.addEventListener("mouseleave", hideTip);
+    svg.appendChild(hit);
+  });
+
+  function showTip(ev, d) {
+    const rect = svg.getBoundingClientRect();
+    const px = ((x(d.y)) / W) * rect.width;
+    const py = ((y(d.base.need)) / H) * rect.height;
+    tooltip.innerHTML = `
+      <div class="t-year">Year ${d.y}${d.capped ? " · SOM-capped" : ""}</div>
+      <div class="t-row"><span><span class="dot" style="background:var(--chart-demand)"></span>Need</span><span>${d.base.need.toFixed(1)} crews</span></div>
+      <div class="t-row"><span><span class="dot" style="background:var(--chart-baseline)"></span>Avail (base)</span><span>${d.base.avail} crews</span></div>
+      <div class="t-row"><span><span class="dot" style="background:var(--chart-friction)"></span>Avail (friction)</span><span>${d.fric.avail} crews</span></div>
+      <div class="t-row"><span>Revenue</span><span>${fmt$(d.rev)}</span></div>
+    `;
+    tooltip.style.left = Math.min(px + 12, rect.width - 190) + "px";
+    tooltip.style.top = Math.max(py - 70, 4) + "px";
+    tooltip.style.opacity = 1;
+  }
+  function hideTip() { tooltip.style.opacity = 0; }
+})();
+</script>

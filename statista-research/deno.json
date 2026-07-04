@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.window", "dom", "dom.iterable", "esnext"]
+  },
+  "tasks": {
+    "server": "deno run -A src/server.ts",
+    "check": "deno check src/server.ts",
+    "test": "deno run -A src/_servertest.ts",
+    "spike": "deno run -A spike.ts"
+  },
+  "imports": {
+    "@astral/astral": "jsr:@astral/astral@^0.5.3",
+    "@modelcontextprotocol/sdk": "npm:@modelcontextprotocol/sdk@^1.19",
+    "zod": "npm:zod@^3.23"
+  }
+}
