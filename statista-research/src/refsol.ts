@@ -68,6 +68,11 @@ export interface BusinessCountResult {
   capturedAt: string; // ISO timestamp
 }
 
+/** Parse the `.totalCount` widget's text (e.g. "33,156") into a number. */
+export function parseCount(raw: string): number {
+  return Number(raw.replace(/[^0-9]/g, ""));
+}
+
 export interface RefsolSessionConfig {
   port?: number;
   profileDir?: string;
@@ -195,7 +200,7 @@ export class RefsolSession {
     }
 
     const raw = await this.#readTotalCount(page);
-    const count = Number(raw.replace(/[^0-9]/g, ""));
+    const count = parseCount(raw);
     return {
       naics: query.naics,
       state: query.state,

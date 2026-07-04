@@ -4,8 +4,9 @@
   },
   "tasks": {
     "server": "deno run -A src/server.ts",
-    "check": "deno check src/server.ts",
-    "test": "deno run -A src/_servertest.ts",
+    "check": "deno check src/server.ts estimator/projection.ts estimator/margins.ts",
+    "test": "deno test -A src/ estimator/",
+    "test:e2e": "deno run -A src/_servertest.ts",
     "spike": "deno run -A spike.ts"
   },
   "imports": {
