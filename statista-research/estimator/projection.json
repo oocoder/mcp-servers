@@ -1,0 +1,362 @@
+{
+  "params": {
+    "accountPath": [
+      20,
+      40,
+      60,
+      80,
+      100,
+      120,
+      140,
+      160,
+      180,
+      200
+    ],
+    "rampFactor": 0.5,
+    "ticketSize": 2000,
+    "jobsPerAccountPerYear": 30,
+    "msaPopShareOfFL": 0.12,
+    "pmTurnShareOfFlooringRevenue": 0.15,
+    "obtainableShareByYear": [
+      0.08,
+      0.12,
+      0.16,
+      0.2,
+      0.22,
+      0.24,
+      0.25,
+      0.25,
+      0.25,
+      0.25
+    ],
+    "crewSize": 2,
+    "nonemployerFirms": 368,
+    "workDaysPerYear": 250,
+    "baseline": {
+      "refusalRate": 0.3,
+      "noShowRate": 0.15,
+      "willingShare": 0.3
+    },
+    "friction": {
+      "refusalRate": 0.38,
+      "noShowRate": 0.26,
+      "willingShare": 0.17
+    },
+    "quarterlyChurn": 0.35
+  },
+  "fl": {
+    "millions": 1697.52,
+    "year": "2024",
+    "title": "Industry revenue of “flooring contractors“ in Florida 2012-2024"
+  },
+  "blsInstallers": 60,
+  "msaFlooringRevenue": 203.70239999999998,
+  "samPmTurn": 30.555359999999997,
+  "totalLocalCrews": 398,
+  "rows": [
+    {
+      "year": 0,
+      "accountsSigned": 20,
+      "effectiveAccounts": 20,
+      "demandRevenue": 1200000,
+      "somCeiling": 2444428.8,
+      "cappedRevenueBeforeLabor": 1200000,
+      "jobsNeeded": 600,
+      "jobsPerDay": 2.4,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 4.033613445378151,
+          "nOnboarded": 6.205559146735617,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 1200000,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 5.231037489102005,
+          "nOnboarded": 8.047749983233853,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 1200000,
+          "verdict": "OK"
+        }
+      }
+    },
+    {
+      "year": 1,
+      "accountsSigned": 40,
+      "effectiveAccounts": 30,
+      "demandRevenue": 1800000,
+      "somCeiling": 3666643.1999999993,
+      "cappedRevenueBeforeLabor": 1800000,
+      "jobsNeeded": 900,
+      "jobsPerDay": 3.6,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 6.050420168067228,
+          "nOnboarded": 9.308338720103427,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 1800000,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 7.846556233653009,
+          "nOnboarded": 12.071624974850781,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 1800000,
+          "verdict": "OK"
+        }
+      }
+    },
+    {
+      "year": 2,
+      "accountsSigned": 60,
+      "effectiveAccounts": 50,
+      "demandRevenue": 3000000,
+      "somCeiling": 4888857.6,
+      "cappedRevenueBeforeLabor": 3000000,
+      "jobsNeeded": 1500,
+      "jobsPerDay": 6,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 10.084033613445378,
+          "nOnboarded": 15.513897866839041,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 3000000,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 13.077593722755013,
+          "nOnboarded": 20.119374958084634,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 3000000,
+          "verdict": "OK"
+        }
+      }
+    },
+    {
+      "year": 3,
+      "accountsSigned": 80,
+      "effectiveAccounts": 70,
+      "demandRevenue": 4200000,
+      "somCeiling": 6111072,
+      "cappedRevenueBeforeLabor": 4200000,
+      "jobsNeeded": 2100,
+      "jobsPerDay": 8.4,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 14.11764705882353,
+          "nOnboarded": 21.71945701357466,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 4200000,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 18.30863121185702,
+          "nOnboarded": 28.16712494131849,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 4200000,
+          "verdict": "OK"
+        }
+      }
+    },
+    {
+      "year": 4,
+      "accountsSigned": 100,
+      "effectiveAccounts": 90,
+      "demandRevenue": 5400000,
+      "somCeiling": 6722179.199999999,
+      "cappedRevenueBeforeLabor": 5400000,
+      "jobsNeeded": 2700,
+      "jobsPerDay": 10.8,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 18.151260504201684,
+          "nOnboarded": 27.925016160310282,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 5400000,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 23.539668700959027,
+          "nOnboarded": 36.21487492455235,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 5400000,
+          "verdict": "OK"
+        }
+      }
+    },
+    {
+      "year": 5,
+      "accountsSigned": 120,
+      "effectiveAccounts": 110,
+      "demandRevenue": 6600000,
+      "somCeiling": 7333286.3999999985,
+      "cappedRevenueBeforeLabor": 6600000,
+      "jobsNeeded": 3300,
+      "jobsPerDay": 13.2,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 22.18487394957983,
+          "nOnboarded": 34.130575307045895,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 6600000,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 28.770706190061027,
+          "nOnboarded": 44.2626249077862,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 6600000,
+          "verdict": "OK"
+        }
+      }
+    },
+    {
+      "year": 6,
+      "accountsSigned": 140,
+      "effectiveAccounts": 130,
+      "demandRevenue": 7800000,
+      "somCeiling": 7638839.999999999,
+      "cappedRevenueBeforeLabor": 7638839.999999999,
+      "jobsNeeded": 3819.4199999999996,
+      "jobsPerDay": 15.277679999999998,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 25.676773109243697,
+          "nOnboarded": 39.50272786037492,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 33.299215344376634,
+          "nOnboarded": 51.22956206827174,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "TIGHT"
+        }
+      }
+    },
+    {
+      "year": 7,
+      "accountsSigned": 160,
+      "effectiveAccounts": 150,
+      "demandRevenue": 9000000,
+      "somCeiling": 7638839.999999999,
+      "cappedRevenueBeforeLabor": 7638839.999999999,
+      "jobsNeeded": 3819.4199999999996,
+      "jobsPerDay": 15.277679999999998,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 25.676773109243697,
+          "nOnboarded": 39.50272786037492,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 33.299215344376634,
+          "nOnboarded": 51.22956206827174,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "TIGHT"
+        }
+      }
+    },
+    {
+      "year": 8,
+      "accountsSigned": 180,
+      "effectiveAccounts": 170,
+      "demandRevenue": 10200000,
+      "somCeiling": 7638839.999999999,
+      "cappedRevenueBeforeLabor": 7638839.999999999,
+      "jobsNeeded": 3819.4199999999996,
+      "jobsPerDay": 15.277679999999998,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 25.676773109243697,
+          "nOnboarded": 39.50272786037492,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 33.299215344376634,
+          "nOnboarded": 51.22956206827174,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "TIGHT"
+        }
+      }
+    },
+    {
+      "year": 9,
+      "accountsSigned": 200,
+      "effectiveAccounts": 190,
+      "demandRevenue": 11400000,
+      "somCeiling": 7638839.999999999,
+      "cappedRevenueBeforeLabor": 7638839.999999999,
+      "jobsNeeded": 3819.4199999999996,
+      "jobsPerDay": 15.277679999999998,
+      "scenarios": {
+        "baseline": {
+          "yield": 0.595,
+          "nActive": 25.676773109243697,
+          "nOnboarded": 39.50272786037492,
+          "availableCrews": 119.39999999999999,
+          "maxFulfillableRevenue": 35521499.99999999,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "OK"
+        },
+        "friction": {
+          "yield": 0.4588,
+          "nActive": 33.299215344376634,
+          "nOnboarded": 51.22956206827174,
+          "availableCrews": 67.66000000000001,
+          "maxFulfillableRevenue": 15521204.000000004,
+          "finalRevenue": 7638839.999999999,
+          "verdict": "TIGHT"
+        }
+      }
+    }
+  ],
+  "crossovers": {
+    "baseline": null,
+    "friction": null
+  }
+}
