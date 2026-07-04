@@ -35,7 +35,7 @@ const fail = (msg: string) => ({
   isError: true,
 });
 
-const server = new McpServer({ name: "statista-research", version: "0.1.0" });
+const server = new McpServer({ name: "research-db-mcp", version: "0.2.0" });
 
 server.registerTool(
   "statista_search",
@@ -190,4 +190,4 @@ server.registerTool(
 );
 
 await server.connect(new StdioServerTransport());
-console.error("[statista-research] MCP server ready on stdio");
+console.error("[research-db-mcp] MCP server ready on stdio");

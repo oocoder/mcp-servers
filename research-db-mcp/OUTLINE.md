@@ -6,7 +6,10 @@
 > tasks. When making changes, keep this file short and update code comments
 > or the relevant file instead of expanding this outline.
 
-**Project:** `statista-research` MCP  **Updated:** 2026-07-04
+**Project:** `research-db-mcp`  **Updated:** 2026-07-04
+
+Formerly `statista-research`; renamed once Reference Solutions made it a
+genuinely multi-source research MCP, not a Statista-only one.
 
 ---
 
@@ -148,5 +151,7 @@ profiles for *both* data sources. Never commit it.
   browser-bound by design (no fetch-replay is feasible against its
   session-stateful search UI), so any cloud deployment of it needs a
   headless-Chrome-capable runner, not just a lightweight fetch worker.
-- Repo/package rename under consideration now that the MCP spans two data
-  sources, not just Statista.
+- A third NYPL-licensed data source would follow the same shape: a module
+  under `src/`, a shared `secrets.ts` credential resolution, and either the
+  fetch-first pattern (if it exposes a clean API) or the browser-driven
+  pattern (if it doesn't) — see Module Boundaries above.

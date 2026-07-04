@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "research-db-mcp": {
+      "command": "deno",
+      "args": [
+        "run",
+        "-A",
+        "--config",
+        "/Users/alexmaldonado/projects/mcp-servers/research-db-mcp/deno.json",
+        "/Users/alexmaldonado/projects/mcp-servers/research-db-mcp/src/server.ts"
+      ],
+      "cwd": "/Users/alexmaldonado/projects/mcp-servers/research-db-mcp"
+    }
+  }
+}
