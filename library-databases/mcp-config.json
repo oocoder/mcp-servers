@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "library-databases": {
+      "command": "deno",
+      "args": [
+        "run",
+        "-A",
+        "--config",
+        "/Users/alexmaldonado/projects/mcp-servers/library-databases/deno.json",
+        "/Users/alexmaldonado/projects/mcp-servers/library-databases/src/server.ts"
+      ],
+      "cwd": "/Users/alexmaldonado/projects/mcp-servers/library-databases"
+    }
+  }
+}

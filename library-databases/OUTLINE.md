@@ -6,10 +6,14 @@
 > tasks. When making changes, keep this file short and update code comments
 > or the relevant file instead of expanding this outline.
 
-**Project:** `research-db-mcp`  **Updated:** 2026-07-04
+**Project:** `library-databases`  **Updated:** 2026-07-04
 
-Formerly `statista-research`; renamed once Reference Solutions made it a
-genuinely multi-source research MCP, not a Statista-only one.
+Formerly `statista-research`, then briefly `research-db-mcp`. Renamed once
+Reference Solutions made it a genuinely multi-source MCP: "library" names
+the actual unifying constraint (NYPL library-card-gated access), and the
+bare `<domain>-<noun>` form matches this monorepo's sibling convention
+(`ai-search/`, `email-validation/`, `pdf-processor/` — none use an `-mcp`
+suffix).
 
 ---
 
