@@ -24,10 +24,11 @@ that gives Claude direct query access to two NYPL-licensed research
 databases that would otherwise require a browser and a library card:
 **Statista** (statistics, forecasts, market data) and **Reference
 Solutions / Data Axle** (business-establishment counts by NAICS code and
-geography). It also contains a standalone business-capacity/revenue/margin
-estimator (`estimator/`) built on top of the Statista client, produced for
-a client engagement (CKS, an Orlando flooring-installer network) — that
-estimator is not itself an MCP tool.
+geography). A client-specific business-analysis estimator (CKS, an Orlando
+flooring-installer network) that consumes the Statista client for live data
+previously lived here; it now has its own project
+(`~/projects/cks-poc-order-to-crm/research/`) and reuses `src/client.ts` via
+an import map — the MCP itself stays a general NYPL-database access broker.
 
 The two data sources have fundamentally different access patterns, and
 that difference shapes the whole design:
@@ -87,11 +88,10 @@ colliding.
                                                     session, distinct
                                                     profile + port)
 
-   estimator/  (standalone; consumes src/client.ts directly, not via
-                MCP tools; independent of src/refsol.ts for now)
-       projection.ts (capacity/revenue/SOM) -> projection.json
-       margins.ts    (GC + marketplace P&L)  -> margins.json
-       cks-projection.html — published client-facing artifact
+   (A downstream CKS business-analysis estimator formerly lived here under
+    estimator/; it was moved to its own project — ~/projects/cks-poc-order-to-crm/
+    research/ — since it is client-specific research, not part of this MCP. It
+    still reuses src/client.ts for live Statista data via an import map.)
 ```
 
 ---
@@ -107,7 +107,6 @@ colliding.
 | `src/secrets.ts` | NYPL credential resolution (env vars → macOS Keychain) | Shared by `session.ts` and `refsol.ts` |
 | `src/cookies.ts` | Statista cookie bundle persistence | Statista-only |
 | `src/server.ts` (L4) | MCP tool registration/dispatch | The only file Claude talks to |
-| `estimator/` | CKS capacity/revenue/margin model | Imports `src/client.ts` directly (not via MCP tools) |
 
 ---
 
@@ -122,8 +121,8 @@ colliding.
 | Credential setup (Keychain / env vars) | `src/secrets.ts` docstring |
 | Registering the server with a client | `mcp-config.json` |
 | Run/check/test commands | `deno.json` `tasks` |
-| CKS business-model assumptions | `estimator/projection.ts`, `estimator/margins.ts` header comments |
-| Unit test coverage | `estimator/*_test.ts`, `src/refsol_test.ts` |
+| CKS business-analysis estimator (moved out) | `~/projects/cks-poc-order-to-crm/research/` — reuses `src/client.ts` for live Statista data via import map |
+| Unit test coverage | `src/refsol_test.ts` (Reference Solutions pure helpers) |
 | Live end-to-end smoke test (spawns the real server, hits live Statista + Reference Solutions) | `src/_servertest.ts` (`deno task test:e2e`) |
 
 ---
