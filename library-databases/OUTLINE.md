@@ -27,7 +27,7 @@ Solutions / Data Axle** (business-establishment counts by NAICS code and
 geography). A client-specific business-analysis estimator (CKS, an Orlando
 flooring-installer network) that consumes the Statista client for live data
 previously lived here; it now has its own project
-(`~/projects/cks-poc-order-to-crm/research/`) and reuses `src/client.ts` via
+(`~/projects/clients/cks/demos/cks-poc-order-to-crm/research/`) and reuses `src/client.ts` via
 an import map — the MCP itself stays a general NYPL-database access broker.
 
 The two data sources have fundamentally different access patterns, and
@@ -121,7 +121,7 @@ colliding.
 | Credential setup (Keychain / env vars) | `src/secrets.ts` docstring |
 | Registering the server with a client | `mcp-config.json` |
 | Run/check/test commands | `deno.json` `tasks` |
-| CKS business-analysis estimator (moved out) | `~/projects/cks-poc-order-to-crm/research/` — reuses `src/client.ts` for live Statista data via import map |
+| CKS business-analysis estimator (moved out) | `~/projects/clients/cks/demos/cks-poc-order-to-crm/research/` — reuses `src/client.ts` for live Statista data via import map |
 | Unit test coverage | `src/refsol_test.ts` (Reference Solutions pure helpers) |
 | Live end-to-end smoke test (spawns the real server, hits live Statista + Reference Solutions) | `src/_servertest.ts` (`deno task test:e2e`) |
 
