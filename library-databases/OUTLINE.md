@@ -6,7 +6,7 @@
 > tasks. When making changes, keep this file short and update code comments
 > or the relevant file instead of expanding this outline.
 
-**Project:** `library-databases`  **Updated:** 2026-07-04
+**Project:** `library-databases`  **Updated:** 2026-07-06
 
 Formerly `statista-research`, then briefly `research-db-mcp`. Renamed once
 Reference Solutions made it a genuinely multi-source MCP: "library" names
@@ -24,11 +24,16 @@ that gives Claude direct query access to two NYPL-licensed research
 databases that would otherwise require a browser and a library card:
 **Statista** (statistics, forecasts, market data) and **Reference
 Solutions / Data Axle** (business-establishment counts by NAICS code and
-geography). A client-specific business-analysis estimator (CKS, an Orlando
-flooring-installer network) that consumes the Statista client for live data
-previously lived here; it now has its own project
-(`~/projects/clients/cks/demos/cks-poc-order-to-crm/research/`) and reuses `src/client.ts` via
-an import map — the MCP itself stays a general NYPL-database access broker.
+geography). Client-specific business-analysis estimators consume this repo's
+clients directly via a `deno.json` import map rather than living here — the
+MCP itself stays a general NYPL-database access broker. Two so far:
+- **CKS** (Orlando flooring-installer network) —
+  `~/projects/clients/cks/demos/cks-poc-order-to-crm/research/` — reuses `src/client.ts` (Statista).
+- **Great Bear / WomenAutoKnow** (Queens NY auto shop + a founder-education
+  side project) — `~/projects/clients/gbar/research/` — reuses `src/client.ts`
+  (Statista) **and** `src/refsol.ts` (`RefsolSession.getBusinessCount`)
+  directly, the first downstream consumer to drive Reference Solutions
+  outside this server's own `refsol_business_count` tool.
 
 The two data sources have fundamentally different access patterns, and
 that difference shapes the whole design:
@@ -88,10 +93,13 @@ colliding.
                                                     session, distinct
                                                     profile + port)
 
-   (A downstream CKS business-analysis estimator formerly lived here under
-    estimator/; it was moved to its own project — ~/projects/cks-poc-order-to-crm/
-    research/ — since it is client-specific research, not part of this MCP. It
-    still reuses src/client.ts for live Statista data via an import map.)
+   (Downstream client-analysis estimators live in their own projects, not
+    here — client-specific research, not part of this MCP:
+      CKS:       ~/projects/clients/cks/demos/cks-poc-order-to-crm/research/
+                 reuses src/client.ts (Statista) via import map.
+      Great Bear/WomenAutoKnow: ~/projects/clients/gbar/research/
+                 reuses src/client.ts (Statista) AND src/refsol.ts
+                 (RefsolSession) directly via import map.)
 ```
 
 ---
@@ -122,6 +130,7 @@ colliding.
 | Registering the server with a client | `mcp-config.json` |
 | Run/check/test commands | `deno.json` `tasks` |
 | CKS business-analysis estimator (moved out) | `~/projects/clients/cks/demos/cks-poc-order-to-crm/research/` — reuses `src/client.ts` for live Statista data via import map |
+| Great Bear / WomenAutoKnow business-analysis estimator | `~/projects/clients/gbar/research/` — reuses `src/client.ts` (Statista) and `src/refsol.ts` (`RefsolSession`, Reference Solutions) directly via import map |
 | Unit test coverage | `src/refsol_test.ts` (Reference Solutions pure helpers) |
 | Live end-to-end smoke test (spawns the real server, hits live Statista + Reference Solutions) | `src/_servertest.ts` (`deno task test:e2e`) |
 
@@ -158,3 +167,10 @@ profiles for *both* data sources. Never commit it.
   under `src/`, a shared `secrets.ts` credential resolution, and either the
   fetch-first pattern (if it exposes a clean API) or the browser-driven
   pattern (if it doesn't) — see Module Boundaries above.
+- Downstream consumers often also hit **BLS's public OEWS API directly**
+  (no NYPL license needed, so it bypasses this MCP entirely — see CKS's and
+  Great Bear's `projection.ts`). Its unregistered/no-key tier has a low
+  **daily** request quota shared per IP; probing several datatype-code
+  variants to confirm a series ID (see Great Bear `project-spec.md` §1b) can
+  burn the whole day's quota. Freeze captured values as a fallback rather
+  than assuming a live re-fetch will always succeed.
