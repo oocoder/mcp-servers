@@ -26,7 +26,7 @@ databases that would otherwise require a browser and a library card:
 Solutions / Data Axle** (business-establishment counts by NAICS code and
 geography). Client-specific business-analysis estimators consume this repo's
 clients directly via a `deno.json` import map rather than living here — the
-MCP itself stays a general NYPL-database access broker. Two so far:
+MCP itself stays a general NYPL-database access broker. Three so far:
 - **CKS** (Orlando flooring-installer network) —
   `~/projects/clients/cks/demos/cks-poc-order-to-crm/research/` — reuses `src/client.ts` (Statista).
 - **Great Bear / WomenAutoKnow** (Queens NY auto shop + a founder-education
@@ -34,6 +34,15 @@ MCP itself stays a general NYPL-database access broker. Two so far:
   (Statista) **and** `src/refsol.ts` (`RefsolSession.getBusinessCount`)
   directly, the first downstream consumer to drive Reference Solutions
   outside this server's own `refsol_business_count` tool.
+- **Mira Agency** (NYC ops/BD consulting agency; a `company-research`-skill
+  test run, not a paid engagement) — `~/projects/clients/mira-agency/research/`
+  — reuses `src/client.ts` (Statista); Reference Solutions was queried once
+  via `RefsolSession.getBusinessCount` for a firm-count snapshot, then frozen
+  as a parameter rather than wired into the estimator's live path (same
+  freezing pattern CKS uses for its own Reference Solutions count). First
+  consumer built for a business model genuinely unlike CKS's — confirms the
+  `company-research` skill's 3-stage estimator *shape* (not CKS's specific
+  formulas) generalizes across business types.
 
 The two data sources have fundamentally different access patterns, and
 that difference shapes the whole design:
@@ -99,7 +108,11 @@ colliding.
                  reuses src/client.ts (Statista) via import map.
       Great Bear/WomenAutoKnow: ~/projects/clients/gbar/research/
                  reuses src/client.ts (Statista) AND src/refsol.ts
-                 (RefsolSession) directly via import map.)
+                 (RefsolSession) directly via import map.
+      Mira Agency (company-research skill test run):
+                 ~/projects/clients/mira-agency/research/
+                 reuses src/client.ts (Statista) via import map; Reference
+                 Solutions queried once out-of-band, frozen as a parameter.)
 ```
 
 ---
@@ -131,6 +144,7 @@ colliding.
 | Run/check/test commands | `deno.json` `tasks` |
 | CKS business-analysis estimator (moved out) | `~/projects/clients/cks/demos/cks-poc-order-to-crm/research/` — reuses `src/client.ts` for live Statista data via import map |
 | Great Bear / WomenAutoKnow business-analysis estimator | `~/projects/clients/gbar/research/` — reuses `src/client.ts` (Statista) and `src/refsol.ts` (`RefsolSession`, Reference Solutions) directly via import map |
+| Mira Agency business-analysis estimator (`company-research` skill test run) | `~/projects/clients/mira-agency/research/` — reuses `src/client.ts` (Statista) via import map; Reference Solutions queried once out-of-band, frozen as a parameter |
 | Unit test coverage | `src/refsol_test.ts` (Reference Solutions pure helpers) |
 | Live end-to-end smoke test (spawns the real server, hits live Statista + Reference Solutions) | `src/_servertest.ts` (`deno task test:e2e`) |
 
